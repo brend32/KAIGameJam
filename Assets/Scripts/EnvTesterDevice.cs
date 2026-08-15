@@ -1,4 +1,5 @@
 using System;
+using DefaultNamespace;
 using UnityEngine;
 
 public class EnvTesterDevice : MonoBehaviour
@@ -13,11 +14,11 @@ public class EnvTesterDevice : MonoBehaviour
     public float ParticlesCollectSpeedCoefficient;
 
     public float InputVolume;
+    public float TestInput;
+    public float TestInputDecay;
+    public float MinInput;
     public float DisplayedTemperature;
     public float DisplayedRadiation => GetRadiationLevel();
-    public float ParticlesCollected;
-    public int MinParticles;
-    public int MaxParticles;
 
     public float NoiseRange;
 
@@ -26,6 +27,7 @@ public class EnvTesterDevice : MonoBehaviour
     public AnimationCurve Precision;
 
     public Environment EnvironmentRef;
+    public StatusPicker StatusPicker;
 
     public void Update()
     {
@@ -41,12 +43,17 @@ public class EnvTesterDevice : MonoBehaviour
         DisplayedTemperature -= CoolSpeed * timeDelta;
         DisplayedTemperature  = Mathf.Max(DisplayedTemperature, EnvironmentRef.Temperature);
 
-        ParticlesCollected += Mathf.Max(GetParticlesCollectSpeed() * timeDelta, 0);
+        TestInput = ExpDecay(TestInput, InputVolume, TestInputDecay, timeDelta);
 
         if (DisplayedTemperature >= MaxTemperature)
         {
             Fail = true;
         }
+    }
+    
+    public static float ExpDecay(float a, float b, float decay, float deltaTime)
+    {
+        return b + (a - b) * Mathf.Exp(-decay * deltaTime);
     }
 
     public float GetParticlesCollectSpeed()
@@ -71,12 +78,17 @@ public class EnvTesterDevice : MonoBehaviour
 
     public float GetRadiationLevel()
     {
-        if (ParticlesCollected < MinParticles ||  ParticlesCollected > MaxParticles || Fail)
+        if (Fail || TestInput < MinInput)
+        {
+            StatusPicker.Value = 0;
             return -1;
+        }
         
-        var precision = Precision.Evaluate(ParticlesCollected / MaxParticles);
+        var precision = Precision.Evaluate(TestInput);
         _pres = precision;
         var noise = Mathf.Lerp(0, NoiseRange, UnityEngine.Random.value) * (1 - precision);
+
+        StatusPicker.Value = precision;
 
         return EnvironmentRef.Radiation * precision + noise;
     }
