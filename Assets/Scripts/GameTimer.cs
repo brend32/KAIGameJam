@@ -12,6 +12,14 @@ public class GameTimer : MonoBehaviour
 
     public float TimeRemaining => timeRemaining; 
     public bool IsRunning => timerIsRunning;
+    
+    private int lastTickSecond; // Змінна для відстеження зміни секунди
+
+    void Start()
+    {
+        // Запам'ятовуємо, з якої секунди починаємо
+        lastTickSecond = Mathf.FloorToInt(timeRemaining);
+    }
 
     void Update()
     {
@@ -22,13 +30,31 @@ public class GameTimer : MonoBehaviour
                 timeRemaining -= Time.deltaTime;
                 DisplayTime(timeRemaining);
                 UpdateFade(); 
+
+                int currentSecond = Mathf.FloorToInt(timeRemaining);
+                
+                if (currentSecond < lastTickSecond)
+                {
+                    lastTickSecond = currentSecond;
+                    
+                    if (timeRemaining <= 20f && AudioManager.Instance != null)
+                    {
+                        AudioManager.Instance.PlaySFX(AudioManager.Instance.timerTick);
+                    }
+                }
             }
             else
             {
                 timeRemaining = 0;
                 timerIsRunning = false;
+
+                if (AudioManager.Instance != null) 
+                {
+                    AudioManager.Instance.PlaySFX(AudioManager.Instance.timerEnd, 1.5f);
+                }
+                
                 DisplayTime(timeRemaining);
-                UpdateFade(); 
+                UpdateFade();
             }
         }
     }
