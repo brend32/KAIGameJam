@@ -7,6 +7,7 @@ public class LampBlink : MonoBehaviour
     public CanvasGroup Fade;
     public float Frequency;
     public float OffAlpha;
+    public AudioSource Audio;
 
     public float Offset;
 
@@ -14,11 +15,13 @@ public class LampBlink : MonoBehaviour
     {
         if (On)
         {
+            Audio.enabled = true;
             Fade.alpha = Mathf.Lerp(OffAlpha, 1, (Mathf.Sin(Frequency * Offset) + 1) / 2);
             Offset += Time.deltaTime;
         }
         else
         {
+            Audio.enabled = false;
             Offset = 0;
             Fade.alpha = OffAlpha;
         }

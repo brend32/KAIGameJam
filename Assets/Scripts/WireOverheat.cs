@@ -38,7 +38,8 @@ public class WireOverheat : MonoBehaviour
         else
         {
             wireAudio.volume = 0f;
-            if (wireAudio.isPlaying) wireAudio.Stop();
+            // Можна зупинити, якщо гучність 0, щоб не витрачати ресурси
+            if (wireAudio.isPlaying && wireAudio.volume == 0f) wireAudio.Stop();
         }
     }
 
