@@ -179,3 +179,5 @@ DerivedData/
 # Playgrounds
 timeline.xctimeline
 playground.xcworkspace
+KAIGameJam.slnx
+.vsconfig
