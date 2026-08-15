@@ -10,30 +10,54 @@ public class WireOverheat : MonoBehaviour
     [SerializeField] private float coolRate = 15f; 
 
     [SerializeField] private Gradient heatGradient; 
-    
+    [SerializeField] private AudioSource wireAudioSource; 
+    [SerializeField] private float minVolume = 0.1f;
+    [SerializeField] private float maxVolume = 1.0f;
+    [SerializeField] private float criticalThreshold = 90f;
+
     private SpriteRenderer wireRenderer;
 
     void Awake()
     {
         wireRenderer = GetComponent<SpriteRenderer>();
+        // Більше не шукаємо AudioSource на самому дроті, беремо його з Менеджера
     }
 
-    void Update()
+    private void UpdateWireSound()
     {
-        bool isPressingSpace = Keyboard.current != null && Keyboard.current.spaceKey.isPressed;
+        // Звертаємось до Менеджера через Instance
+        AudioSource wireAudio = AudioManager.Instance.wireLoopSource;
 
-        if (isPressingSpace)
+        if (wireAudio == null) return;
+
+        if (currentHeat >= criticalThreshold)
         {
-            currentHeat += heatRate * Time.deltaTime;
+            float volumePercent = (currentHeat - criticalThreshold) / (maxHeat - criticalThreshold);
+            wireAudio.volume = Mathf.Lerp(minVolume, maxVolume, volumePercent);
+            
+            // Якщо звук ще не грає - запускаємо
+            if (!wireAudio.isPlaying) wireAudio.Play();
         }
         else
         {
-            currentHeat -= coolRate * Time.deltaTime;
+            wireAudio.volume = 0f;
+            // Можна зупинити, якщо гучність 0, щоб не витрачати ресурси
+            if (wireAudio.isPlaying && wireAudio.volume == 0f) wireAudio.Stop();
         }
+    }
+    private void UpdateWireSound()
+    {
+        if (wireAudioSource == null) return;
+        if (currentHeat >= criticalThreshold)
+        {
 
-        currentHeat = Mathf.Clamp(currentHeat, 0f, maxHeat);
-
-        UpdateWireColor();
+            float volumePercent = (currentHeat - criticalThreshold) / (maxHeat - criticalThreshold);
+            wireAudioSource.volume = Mathf.Lerp(minVolume, maxVolume, volumePercent);
+        }
+        else
+        {
+            wireAudioSource.volume = 0f; 
+        }
     }
 
     private void UpdateWireColor()

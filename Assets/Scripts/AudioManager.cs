@@ -6,6 +6,7 @@ public class AudioManager : MonoBehaviour
 
     [SerializeField] private AudioSource musicSource;
     [SerializeField] private AudioSource sfxSource;
+    [SerializeField] public AudioSource wireLoopSource;
     public AudioClip timerTick;
     public AudioClip timerEnd;
     public AudioClip geigerClick;
