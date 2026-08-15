@@ -18,7 +18,7 @@ public class GameRandom : MonoBehaviour
     {
         RadiationProvider.SetPoint(Mathf.Lerp(BoundOffset, 1 - BoundOffset, Random.value));
         RadiationProvider.Radiation = Random.Range(RadiationMin, RadiationMax);
-        Environment.Temperature = Temperatures[Random.Range(0, Temperatures.Length)] * 20;
+        Environment.Temperature = TemperatureDisplay.ConvertIndexToTemperature(Temperatures[Random.Range(0, Temperatures.Length)]);
         Environment.Ground = GroundTypes[Random.Range(0, GroundTypes.Length)];
     }
 }
