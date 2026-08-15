@@ -3,14 +3,21 @@ using UnityEngine;
 
 public class DrillDevice : MonoBehaviour
 {
+    public float SpeedPunish;
+    
     public bool Failed;
     public float Depth;
+    public float MaxDepth;
+    public float NormalizedDepth => Depth / MaxDepth;
     public float Speed;
     public float SpeedDecay;
 
     public float SelectedPower;
     public float Temperature;
     public float MaxTemperature;
+
+    public float NoResistDepth = 0.2f;
+    public float NoResistDrop = 0.2f;
 
     public AnimationCurve InvalidSpeedPunish;
     public AnimationCurve TemperatureCurve;
@@ -26,7 +33,11 @@ public class DrillDevice : MonoBehaviour
         var timeDelta = Time.deltaTime;
 
         if (Failed)
+        {
+            Speed = 0;
+            Temperature = 0;
             return;
+        }
         
         Speed = ExpDecay(Speed, SelectedPower, SpeedDecay, timeDelta);
         
@@ -35,16 +46,22 @@ public class DrillDevice : MonoBehaviour
         if (Speed > Ground.SpeedMax)
         {
             InvalidSpeedTime += timeDelta;
-            invalidSpeedPunish -= InvalidSpeedPunish.Evaluate(InvalidSpeedTime);
+            invalidSpeedPunish = InvalidSpeedPunish.Evaluate(InvalidSpeedTime) * timeDelta;
         }
         else
         {
             invalidSpeedPunish = 0;
             InvalidSpeedTime = 0;
         }
-        
-        Temperature += TemperatureCurve.Evaluate(Speed) * Ground.HeatUpCoefficient * timeDelta;
-        Temperature += invalidSpeedPunish;
+
+        SpeedPunish = invalidSpeedPunish;
+
+        if (Depth < MaxDepth && Depth > NoResistDepth)
+        {
+            Temperature += TemperatureCurve.Evaluate(Speed) * Ground.HeatUpCoefficient * timeDelta;
+            Temperature += invalidSpeedPunish;
+        }
+
         Temperature -= CoolSpeed * timeDelta;
         if (Temperature > MaxTemperature)
         {
@@ -53,9 +70,21 @@ public class DrillDevice : MonoBehaviour
         
         Temperature = Mathf.Clamp(Temperature, Environment.Temperature, MaxTemperature);
 
-        if (Speed > Ground.SpeedMin)
+        if (Speed > Ground.SpeedMin || Depth < NoResistDepth)
         {
-            Depth += DropSpeed.Evaluate(Speed) * timeDelta;
+            if (Depth >= MaxDepth)
+            {
+                Depth = MaxDepth;
+                return;
+            }
+
+            var drop = Ground.Drop.Evaluate(Speed);
+            if (Depth < NoResistDepth)
+            {
+                drop = Mathf.Max(drop, NoResistDrop * Speed);
+            }
+            Depth += drop * timeDelta;
+            Temperature -= CoolSpeed * drop * 2 * timeDelta;
         }
     }
     
@@ -67,5 +96,10 @@ public class DrillDevice : MonoBehaviour
     public void Fail()
     {
         Failed = true;
+    }
+    
+    public void SetSpeed(float speed)
+    {
+        SelectedPower = speed;
     }
 }

@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 176c876f54424658942551c77e791d5e, type: 3}
-  m_Name: Soft
+  m_Name: Normal
   m_EditorClassIdentifier: Assembly-CSharp::GroudSO
-  Type: 0
+  Type: 1
   HeatUpCoefficient: 30
-  SpeedMin: 0.2
-  SpeedMax: 0.74
+  SpeedMin: 0.301
+  SpeedMax: 1
   Drop:
     serializedVersion: 2
     m_Curve:
