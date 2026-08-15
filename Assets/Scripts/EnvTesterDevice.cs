@@ -3,6 +3,10 @@ using UnityEngine;
 
 public class EnvTesterDevice : MonoBehaviour
 {
+    public float _pres;
+
+    public bool Fail;
+    
     public float MaxTemperature;
     public float CoolSpeed;
     public float HeatUpCoefficient;
@@ -18,6 +22,7 @@ public class EnvTesterDevice : MonoBehaviour
     public float NoiseRange;
 
     public AnimationCurve InputVolumeCorve;
+    public AnimationCurve InputVolumeParticlesCurve;
     public AnimationCurve Precision;
 
     public Environment EnvironmentRef;
@@ -25,6 +30,12 @@ public class EnvTesterDevice : MonoBehaviour
     public void Update()
     {
         var timeDelta = Time.deltaTime;
+
+        if (Fail)
+        {
+            DisplayedTemperature = 0;
+            return;
+        }
         
         DisplayedTemperature += GetHeatUpSpeed() * timeDelta;
         DisplayedTemperature -= CoolSpeed * timeDelta;
@@ -34,28 +45,44 @@ public class EnvTesterDevice : MonoBehaviour
 
         if (DisplayedTemperature >= MaxTemperature)
         {
-            ParticlesCollected = MaxParticles;
+            Fail = true;
         }
     }
 
     public float GetParticlesCollectSpeed()
     {
-        return InputVolumeCorve.Evaluate(InputVolume) * EnvironmentRef.Radiation * EnvironmentRef.Temperature * ParticlesCollectSpeedCoefficient;
+        return GetInputParticlesVolume() * ParticlesCollectSpeedCoefficient;
     }
 
     public float GetHeatUpSpeed()
     {
-        return InputVolumeCorve.Evaluate(InputVolume) * HeatUpCoefficient * EnvironmentRef.Radiation;
+        return GetInputVolume() * HeatUpCoefficient;
+    }
+
+    public float GetInputVolume()
+    {
+        return Mathf.Max(0, InputVolumeCorve.Evaluate(InputVolume));
+    }
+    
+    public float GetInputParticlesVolume()
+    {
+        return Mathf.Max(0, InputVolumeParticlesCurve.Evaluate(InputVolume));
     }
 
     public float GetRadiationLevel()
     {
-        if (ParticlesCollected < MinParticles ||  ParticlesCollected > MaxParticles)
+        if (ParticlesCollected < MinParticles ||  ParticlesCollected > MaxParticles || Fail)
             return -1;
         
-        var precision = Precision.Evaluate(ParticlesCollected);
-        var noise = Mathf.Lerp(-NoiseRange, NoiseRange, UnityEngine.Random.value) * precision;
+        var precision = Precision.Evaluate(ParticlesCollected / MaxParticles);
+        _pres = precision;
+        var noise = Mathf.Lerp(0, NoiseRange, UnityEngine.Random.value) * (1 - precision);
 
-        return EnvironmentRef.Radiation + noise;
+        return EnvironmentRef.Radiation * precision + noise;
+    }
+
+    public void SetInputVolume(float value)
+    {
+        InputVolume = value;
     }
 }

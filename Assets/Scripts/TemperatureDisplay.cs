@@ -12,7 +12,7 @@ public class TemperatureDisplay : MonoBehaviour
 
         for (int i = 0; i < Lamps.Length; i++)
         {
-            Lamps[i].SetValue(i <= index);
+            Lamps[i].SetValue(i < index);
         }
     }
 
