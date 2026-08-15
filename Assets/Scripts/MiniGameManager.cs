@@ -2,10 +2,9 @@ using UnityEngine;
 
 public class MiniGameManager : MonoBehaviour
 {
-    [Header("Мінігри")]
-    public MiniGame drillingGame;     // Q — буріння
-    public MiniGame temperatureGame;  // W — температура
-    public MiniGame radiationGame;    // E — радіація
+    public MiniGame drillingGame;
+    public MiniGame temperatureGame;
+    public MiniGame radiationGame;
 
     private MiniGame currentGame;
 
@@ -20,31 +19,37 @@ public class MiniGameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E))
             Toggle(radiationGame);
 
-        // ESC — закрити активну
         if (Input.GetKeyDown(KeyCode.Escape) && currentGame != null)
-        {
-            currentGame.Close();
-            currentGame = null;
-        }
+            CloseCurrent();
     }
 
     void Toggle(MiniGame game)
     {
         if (game == null) return;
 
-        // Якщо ця сама вже відкрита — закрити
         if (currentGame == game)
         {
-            game.Close();
-            currentGame = null;
+            CloseCurrent();
             return;
         }
 
-        // Закрити попередню
         if (currentGame != null)
             currentGame.Close();
 
         game.Open();
         currentGame = game;
+
+        PlayerMovement.CanMove = false; // <-- заблокувати рух
+    }
+
+    void CloseCurrent()
+    {
+        if (currentGame != null)
+        {
+            currentGame.Close();
+            currentGame = null;
+        }
+
+        PlayerMovement.CanMove = true; // <-- дозволити рух
     }
 }

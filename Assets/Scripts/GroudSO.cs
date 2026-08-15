@@ -10,4 +10,5 @@ public class GroudSO : ScriptableObject
     public float SpeedMin;
     [Range(0, 1)]
     public float SpeedMax;
+    public AnimationCurve Drop;
 }

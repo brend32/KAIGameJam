@@ -48,7 +48,7 @@ public class SpriteToUIConverter : MonoBehaviour
 
         if (targetCanvas == null)
         {
-            targetCanvas = FindFirstObjectByType<Canvas>();
+            targetCanvas = FindAnyObjectByType<Canvas>();
             if (targetCanvas == null)
             {
                 Debug.LogError("No Canvas found in the scene to place UI elements under.");
