@@ -45,20 +45,6 @@ public class WireOverheat : MonoBehaviour
             if (wireAudio.isPlaying && wireAudio.volume == 0f) wireAudio.Stop();
         }
     }
-    private void UpdateWireSound()
-    {
-        if (wireAudioSource == null) return;
-        if (currentHeat >= criticalThreshold)
-        {
-
-            float volumePercent = (currentHeat - criticalThreshold) / (maxHeat - criticalThreshold);
-            wireAudioSource.volume = Mathf.Lerp(minVolume, maxVolume, volumePercent);
-        }
-        else
-        {
-            wireAudioSource.volume = 0f; 
-        }
-    }
 
     private void UpdateWireColor()
     {

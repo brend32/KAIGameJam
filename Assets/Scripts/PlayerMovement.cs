@@ -1,14 +1,22 @@
+using Spine.Unity;
 using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    public SkeletonAnimation SkeletonAnimation;
+    [SpineAnimation]
+    public string IdleAnimationName = "idle";
 
+    [SpineAnimation]
+    public string WalkAnimationName = "walk";
+    
     [SerializeField] private AudioClip footstepClip; 
     [SerializeField] private float stepInterval = 0.4f; 
-private float stepTimer;
+    private float stepTimer;
     public float moveSpeed = 5f;
 
     public static bool CanMove = true;
+    public string CurrentAnimationName;
 
     private Rigidbody2D rb;
     private float moveInput;
@@ -34,6 +42,9 @@ private float stepTimer;
 
         if (moveInput != 0) 
         {
+            SetAnimation(WalkAnimationName, true);
+            
+            
             stepTimer -= Time.deltaTime;
             if (stepTimer <= 0)
             {
@@ -46,7 +57,9 @@ private float stepTimer;
         }
         else
         {
-            stepTimer = 0; 
+            stepTimer = 0;                
+            SetAnimation(IdleAnimationName, true);
+ 
         }
     }
 
@@ -62,4 +75,13 @@ private float stepTimer;
         scale.x *= -1f;
         transform.localScale = scale;
     }
+    
+    public void SetAnimation(string animationName, bool loop)
+    {
+        if (CurrentAnimationName == animationName) return;
+
+        SkeletonAnimation.AnimationState.SetAnimation(0, animationName, loop);
+        CurrentAnimationName = animationName;
+    }
+    
 }

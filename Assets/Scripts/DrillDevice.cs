@@ -84,7 +84,6 @@ public class DrillDevice : MonoBehaviour
                 drop = Mathf.Max(drop, NoResistDrop * Speed);
             }
             Depth += drop * timeDelta;
-            Temperature -= CoolSpeed * drop * 2 * timeDelta;
         }
     }
     
